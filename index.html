@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="imagenes/images.png" type="image/png">
+    <title>Amarket</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="top-header">
+        <div class="header-brand">
+            <img src="imagenes/Logo.png" class="logo">
+        </div>
+        <div class="header-buttons">
+            <button class="btn-open-add-product" onclick="abrirModalNuevoProducto()">➕ Agregar Producto</button>
+            <button class="btn-open-add-product" onclick="abrirModalNuevoCliente()"
+                style="background-color: #2563eb; border-color: #1d4ed8;">👤 Agregar Cliente Farmaclub</button>
+        </div>
+    </div>
+
+    <div class="pos-fullscreen-container">
+
+        <div class="main-panel">
+            <div class="instructions">
+                💡 <b>Modo de uso:</b> Escribe el producto y presiona la tecla <b>ENTER</b>. El sistema hará un sonido
+                "PIP" de escáner real y lo cargará automáticamente al ticket de cobro.
+            </div>
+
+            <div>
+                <label class="input-label">Simular Artículo / Precio:</label>
+                <input type="text" id="input-producto" placeholder="Ej: Bolsa de Leche Pil 2L" class="input-field"
+                    autofocus autocomplete="off">
+            </div>
+
+            <div class="scanner-mock" onclick="simularEscaneoManual()">
+                [ ÁREA DE ESCÁNER VIRTUAL ]<br>
+                <span class="scanner-subtext">(Puedes hacer clic aquí o presionar ENTER arriba)</span>
+            </div>
+            <button class="btn-camera" onclick="abrirEscanerCamara()">[ 📷 ESCANEAR CON CÁMARA ]</button>
+        </div>
+
+        <div class="receipt-panel">
+            <div>
+                <div class="receipt-title">TICKET DE COMPRA</div>
+                <ul class="receipt-list" id="lista-ticket"></ul>
+            </div>
+
+            <div class="total-box">
+                <div class="total-row">
+                    <span>TOTAL:</span>
+                    <span id="txt-total">0.00 Bs.</span>
+                </div>
+                <button class="btn-pay" onclick="verificarFarmaclub()">COBRAR</button>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL ESCÁNER CÁMARA -->
+    <div id="modal-escaner-camara" class="modal-overlay modal-hidden">
+        <div class="modal-box" style="max-width: 500px;">
+            <h2>ESCÁNER DE CÓDIGO DE BARRAS</h2>
+            <p>Apunta el código de barras a la cámara:</p>
+
+            <!-- Visor de la cámara -->
+            <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+
+            <button class="btn-cancel" onclick="cerrarEscanerCamara()" style="margin-top: 15px;">Cerrar Cámara</button>
+        </div>
+    </div>
+
+    <div id="modal-farmaclub" class="modal-overlay modal-hidden">
+        <div class="modal-box">
+            <h2>¿TIENE CÓDIGO FARMACLUB?</h2>
+            <p>Pregunte al cliente antes de continuar con el pago.</p>
+
+            <div class="pay-options-grid">
+                <button class="btn-option btn-yes" onclick="solicitarCodigo()">SÍ</button>
+                <button class="btn-option btn-no" onclick="abrirModalPago()">NO</button>
+            </div>
+
+            <button class="btn-cancel" onclick="cerrarModales()">Cancelar cobro</button>
+        </div>
+    </div>
+
+    <div id="modal-input-codigo" class="modal-overlay modal-hidden">
+        <div class="modal-box">
+            <h2>CONSULTA DE CLIENTE</h2>
+            <p>Solicite el número de carnet o NIT:</p>
+
+            <input type="text" id="codigo-cliente-pos" placeholder="Nro. Carnet o NIT" class="input-field"
+                style="margin-bottom: 20px; text-align: center;" autocomplete="off">
+
+            <div id="contenedor-busqueda-pos" style="margin-bottom: 20px;"></div>
+
+            <div class="pay-options-grid" id="grid-botones-consulta">
+                <button class="btn-option" id="btn-buscar-cliente" onclick="buscarOVerificarCliente()">Buscar /
+                    Continuar</button>
+                <button class="btn-option" onclick="volverAPregunta()" style="background: #e5e7eb;">Atrás</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-pago" class="modal-overlay modal-hidden">
+        <div class="modal-box" style="max-width: 450px;">
+            <h2>PROCESAR PAGO</h2>
+            <p id="info-cliente-pago" style="color: #059669; font-weight: bold; margin-bottom: 15px;"></p>
+
+            <div id="bloque-metodos-pago">
+                <p>Selecciona el método de pago:</p>
+                <div class="pay-options-grid">
+                    <button class="btn-option" onclick="seleccionarMetodo('EFECTIVO')">💵 EFECTIVO</button>
+                    <button class="btn-option" onclick="seleccionarMetodo('QR')">📱 PAGO QR</button>
+                    <button class="btn-option" onclick="seleccionarMetodo('TARJETA')">💳 TARJETA</button>
+                    <button class="btn-option" onclick="seleccionarMetodo('OTRO')">⚙️ OTRO</button>
+                </div>
+                <button class="btn-cancel" onclick="cerrarModales()" style="margin-top: 15px;">Volver atrás</button>
+            </div>
+
+            <div id="bloque-detalle-efectivo" class="modal-hidden" style="text-align: left; margin-top: 10px;">
+                <div
+                    style="background: #f3f4f6; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-weight: bold; font-size: 16px; text-align: center;">
+                    Total a Cobrar: <span id="pago-txt-total" style="color: #ef4444;">0.00 Bs.</span>
+                </div>
+
+                <label class="form-label-add">Monto Recibido (Bs.):</label>
+                <input type="number" step="0.01" id="pago-monto-recibido" placeholder="Ej: 50 o 100"
+                    class="input-field-add" oninput="calcularCambioVuelto()" autocomplete="off">
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: #fef3c7; padding: 10px; border-radius: 6px; border: 1px solid #fcd34d;">
+                    <div>
+                        <span style="font-size: 13px; font-weight: bold; color: #b45309; display: block;">CAMBIO A
+                            ENTREGAR:</span>
+                        <span id="pago-txt-cambio" style="font-size: 20px; font-weight: bold; color: #b45309;">0.00
+                            Bs.</span>
+                    </div>
+                    <button id="btn-cambio-hecho" onclick="marcarCambioComoHecho()"
+                        style="background: #d97706; color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">✓
+                        Hecho</button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                    <button id="btn-finalizar-efectivo" class="btn-add-confirm" onclick="finalizarTransaccionVenta()"
+                        disabled style="background-color: #9ca3af; cursor: not-allowed;">🔒 Finalizar</button>
+                    <button class="btn-add-cancel" onclick="cancelarMetodoSeleccionado()">Atrás</button>
+                </div>
+            </div>
+
+            <div id="bloque-detalle-electronico" class="modal-hidden" style="margin-top: 10px;">
+                <div
+                    style="background: #f3f4f6; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; font-size: 16px;">
+                    Confirmar pago por <span id="pago-txt-metodo-digital" style="color: #2563eb;">QR</span> de: <br>
+                    <img id="qr-pago" class="qr-pago" src="imagenes/qr-pago.jpeg" alt="qr-pago">
+                    <span id="pago-txt-total-digital"
+                        style="color: #ef4444; font-size: 22px; display: block; margin-top: 5px;">0.00 Bs.</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn-add-confirm" onclick="finalizarTransaccionVenta()">✓ Finalizar Venta</button>
+                    <button class="btn-add-cancel" onclick="cancelarMetodoSeleccionado()">Atrás</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-nuevo-producto" class="modal-overlay modal-hidden">
+        <div class="modal-box" style="max-width: 500px; text-align: left;">
+            <h2 style="text-align: center; margin-bottom: 15px;">AÑADIR NUEVO PRODUCTO</h2>
+
+            <label class="form-label-add">Nombre del producto:</label>
+            <input type="text" id="new-prod-nombre" placeholder="Ej: Bolsa de Leche Pil 2L" class="input-field-add"
+                autocomplete="off">
+            <label class="form-label-add">Codigo del producto:</label>
+            <input type="text" id="new-prod-codigo" placeholder="Ej: 7890123456789" class="input-field-add"
+                autocomplete="off">
+
+            <label class="form-label-add">Precio (Bs.):</label>
+            <input type="number" step="0.01" id="new-prod-precio" placeholder="Ej: 15.50" class="input-field-add"
+                autocomplete="off">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                <button class="btn-add-confirm" onclick="guardarProductoEnFirestore()">💾 Guardar en Firebase</button>
+                <button class="btn-add-cancel" onclick="cerrarModales()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-nuevo-cliente" class="modal-overlay modal-hidden">
+        <div class="modal-box" style="max-width: 500px; text-align: left;">
+            <h2 style="text-align: center; margin-bottom: 15px;">AÑADIR NUEVO CLIENTE</h2>
+
+            <label class="form-label-add">Nombre completo:</label>
+            <input type="text" id="new-cli-nombre" placeholder="Ej: Juan Perez" class="input-field-add"
+                autocomplete="off">
+
+            <label class="form-label-add">Fecha de Nacimiento:</label>
+            <input type="date" id="new-cli-fecha" class="input-field-add">
+
+            <label class="form-label-add">Número de NIT / Carnet:</label>
+            <input type="text" id="new-cli-nit" placeholder="Ej: 1234567" class="input-field-add" autocomplete="off">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                <button class="btn-add-confirm" onclick="guardarClienteEnFirestore()"
+                    style="background-color: #2563eb;">💾 Guardar Cliente</button>
+                <button class="btn-add-cancel" onclick="cerrarModales()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-factura-termica" class="modal-overlay modal-hidden">
+        <div class="modal-box-invoice-wrapper">
+
+            <div class="invoice-card-container">
+                <div id="area-ticket-impresion" class="ticket-thermal-paper">
+                    <div class="ticket-header">
+                        <h3>*** AMARKET ***</h3>
+                        <p>FARMACIAS Y SUPERMERCADOS AMARKET S.A.</p>
+                        <p>Casa Matriz - Santa Cruz, Bolivia</p>
+                        <p>Teléfono: (591) 3-3456789</p>
+                        <p>-----------------------------------------</p>
+                        <h4 style="margin: 5px 0;">FACTURA DE VENTA</h4>
+                        <p id="factura-txt-fecha-hora">Fecha: 00/00/0000 | Hora: 00:00</p>
+                        <p id="factura-txt-nro-transaccion">Nro. Transacción: #1000234</p>
+                        <p>-----------------------------------------</p>
+                    </div>
+
+                    <div class="ticket-client-section" id="factura-bloque-cliente">
+                    </div>
+
+                    <p style="text-align:center; margin:0;">-----------------------------------------</p>
+
+                    <table class="ticket-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; width: 55%;">DETALLE</th>
+                                <th style="text-align: center; width: 15%;">CANT</th>
+                                <th style="text-align: right; width: 30%;">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="factura-cuerpo-productos">
+                        </tbody>
+                    </table>
+
+                    <p style="text-align:center; margin:0;">-----------------------------------------</p>
+
+                    <div class="ticket-totals">
+                        <div class="ticket-total-row">
+                            <span>TOTAL A PAGAR:</span>
+                            <b id="factura-total-final">0.00 Bs.</b>
+                        </div>
+                        <div class="ticket-total-row" id="factura-row-metodo">
+                            <span>MÉTODO DE PAGO:</span>
+                            <span id="factura-txt-metodo">EFECTIVO</span>
+                        </div>
+                        <div class="ticket-total-row" id="factura-row-recibido">
+                            <span>EFECTIVO RECIBIDO:</span>
+                            <span id="factura-txt-recibido">0.00 Bs.</span>
+                        </div>
+                        <div class="ticket-total-row" id="factura-row-cambio">
+                            <span>CAMBIO (VUELTO):</span>
+                            <span id="factura-txt-cambio-entregado">0.00 Bs.</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-footer">
+                        <p>-----------------------------------------</p>
+                        <p><b>GRACIAS POR SU PREFERENCIA</b></p>
+                        <p>¡Vuelva Pronto!</p>
+                        <p>*** Sistema POS Amarket ***</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-action-buttons no-print">
+                <h4 style="text-align: center; color: white;">¿DESEA IMPRIMIR LA FACTURA?</h4>
+                <button class="btn-print-ticket" onclick="imprimirTicketTermicoReal()">SI</button>
+                <button class="btn-close-ticket" onclick="limpiarYIniciarNuevaVentaTotal()">NO</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4oYcKDWDwk6w60cfe2xfxCEVqqF1LSP4",
+            authDomain: "amarketsystem.firebaseapp.com",
+            projectId: "amarketsystem",
+            storageBucket: "amarketsystem.firebasestorage.app",
+            messagingSenderId: "469860717859",
+            appId: "1:469860717859:web:f9528c66dbeee1b3cbe896",
+            measurementId: "G-YN24W38PY6"
+        };
+        // Inicializamos Firebase para que esté listo antes de usar script.js
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+
+    <!-- Librería para lectura de código de barras por cámara -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

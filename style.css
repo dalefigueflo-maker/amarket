@@ -1,0 +1,705 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.header-brand {
+    font-size: 24px;
+    font-weight: bold;
+    color: #10b981;
+    letter-spacing: 1px;
+}
+
+.pos-fullscreen-container {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    height: calc(100vh - 65px);
+}
+
+.main-panel {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    background: #ffffff;
+}
+
+.instructions {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.6;
+    background: #f3f4f6;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.input-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #374151;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 18px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-field:focus {
+    border-color: #10b981;
+}
+
+.scanner-mock {
+    background: #1f2937;
+    color: #10b981;
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    font-family: monospace;
+    font-size: 22px;
+    border: 3px dashed #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: auto;
+}
+
+.scanner-mock:active {
+    background: #111827;
+    transform: scale(0.99);
+}
+
+.scanner-subtext {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+.receipt-panel {
+    background: #f9fafb;
+    border-left: 2px solid #e5e7eb;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.receipt-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #111827;
+    margin-bottom: 20px;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.receipt-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    list-style: none;
+    padding-right: 5px;
+}
+
+.receipt-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    color: #374151;
+    padding: 10px 0;
+    border-bottom: 1px dashed #d1d5db;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.item-info {
+    flex: 1;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 15px;
+}
+
+.btn-qty {
+    background: #e5e7eb;
+    border: none;
+    color: #1f2937;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-qty:hover {
+    background: #10b981;
+    color: white;
+}
+
+.qty-number {
+    font-weight: bold;
+    min-width: 15px;
+    text-align: center;
+}
+
+.item-price {
+    font-weight: bold;
+    min-width: 70px;
+    text-align: right;
+}
+
+.total-box {
+    border-top: 3px dashed #9ca3af;
+    padding-top: 20px;
+    margin-top: 20px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 26px;
+    font-weight: bold;
+    color: #111827;
+}
+
+.btn-pay {
+    width: 100%;
+    background-color: #10b981;
+    color: white;
+    border: none;
+    padding: 18px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background 0.2s;
+    letter-spacing: 0.5px;
+}
+
+.btn-pay:hover {
+    background-color: #059669;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+
+.modal-hidden {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-box {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 450px;
+    height: auto;
+    text-align: center;
+    animation: popUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popUp {
+    from {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-box h2 {
+    color: #111827;
+    font-size: 22px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.modal-box p {
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.pay-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.btn-option {
+    background: #f3f4f6;
+    color: #1f2937;
+    border: 2px solid #e5e7eb;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-option:hover {
+    background: #ecfdf5;
+    border-color: #10b981;
+    color: #047857;
+    transform: translateY(-2px);
+}
+
+.btn-yes:hover {
+    background: #ecfdf5;
+    border-color: #10b981;
+    color: #047857;
+}
+
+.btn-no:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #b91c1c;
+}
+
+.btn-cancel {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-cancel:hover {
+    color: #4b5563;
+}
+
+.card-cliente-encontrado {
+    background: #f0fdf4;
+    border: 2px solid #10b981;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    animation: fadeIn 0.2s ease;
+}
+
+.card-cliente-encontrado:hover {
+    background: #dcfce7;
+    transform: scale(1.02);
+}
+
+.card-cliente-label {
+    font-size: 11px;
+    color: #059669;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.card-cliente-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #111827;
+}
+
+.card-cliente-sub {
+    font-size: 13px;
+    color: #4b5563;
+    margin-top: 4px;
+}
+
+.msg-no-encontrado {
+    color: #ef4444;
+    background: #fef2f2;
+    border: 1px dashed #f87171;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 15px;
+    animation: fadeIn 0.2s ease;
+}
+
+.msg-buscando {
+    color: #2563eb;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 10px;
+}
+
+/* ... (Mantén todo lo anterior igual y agrega estos estilos al final) ... */
+
+/* BOTÓN PEQUEÑO DEL ENCABEZADO */
+.btn-open-add-product {
+    background-color: #374151;
+    color: #ffffff;
+    border: 1px solid #4b5563;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-open-add-product:hover {
+    background-color: #10b981;
+    border-color: #10b981;
+}
+
+/* CAMPOS DEL FORMULARIO DE AGREGAR PRODUCTO */
+.form-label-add {
+    font-size: 13px;
+    font-weight: bold;
+    color: #4b5563;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.input-field-add {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-field-add:focus {
+    border-color: #10b981;
+}
+
+/* BOTONES DE CONFIRMACIÓN DEL FORMULARIO */
+.btn-add-confirm {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.btn-add-confirm:hover {
+    background-color: #059669;
+}
+
+.btn-add-cancel {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.btn-add-cancel:hover {
+    background-color: #dc2626;
+}
+
+/* ... (Mantén todo lo anterior igual y agrega estos estilos al final) ... */
+
+/* ESTILOS PARA LA IMAGEN EN EL ENCABEZADO */
+.top-header {
+    background: #242934;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid #eda32c;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Aquí le decimos a la imagen: que ocupe su tamaño real pero sin pasarse */
+.logo {
+    width: 120px;
+    /* Ajusta este número si la imagen es muy grande o pequeña */
+    height: auto;
+    /* Para que no se deforme */
+    object-fit: contain;
+    /* Para que se vea bien proporcionada */
+}
+
+/* Opcional: Para asegurarnos de que el texto de los botones no choque con la imagen */
+.btn-open-add-product {
+    margin-left: 20px;
+    /* Un pequeño espacio entre la imagen y el botón */
+}
+
+.btn-camera {
+    font-weight: bold;
+    color: #fff;
+    background-color: #059669;
+    border: none;
+    width: 100%;
+    height: 30%;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-camera:active {
+    background-color: #047857;
+    transform: scale(0.99);
+}
+
+.ticket-footer p {
+    margin: 2px 0;
+}
+
+/* Modificado para coincidir con el nombre de marca oficial */
+.ticket-footer p::after {
+    content: "";
+    display: block;
+}
+
+.ticket-action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* =========================================================================
+   ESTILOS DE FACTURA TÉRMICA CORREGIDA (FONDO BLANCO Y CORTE DE BOTONES)
+   ========================================================================= */
+.modal-box-invoice-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    max-height: 95vh;
+}
+
+/* Tarjeta contenedora blanca sólida que evita las transparencias de fondo */
+.invoice-card-container {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid #e5e7eb;
+}
+
+/* El papel térmico interno */
+.ticket-thermal-paper {
+    background: #ffffff;
+    color: #000000;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    width: 290px;
+    max-height: 60vh;
+    overflow-y: auto;
+    text-align: left;
+    padding-right: 5px;
+}
+
+.ticket-header {
+    text-align: center;
+    line-height: 1.3;
+}
+
+.ticket-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.ticket-header p {
+    margin: 2px 0;
+    font-size: 11px;
+    color: #333;
+}
+
+.ticket-client-section p {
+    margin: 3px 0;
+    font-size: 12px;
+}
+
+.ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+}
+
+.ticket-table th {
+    font-size: 12px;
+    font-weight: bold;
+    border-bottom: 1px dashed #000;
+    padding-bottom: 4px;
+}
+
+.ticket-table td {
+    padding: 5px 0;
+    font-size: 12px;
+    vertical-align: top;
+    line-height: 1.2;
+}
+
+.ticket-totals {
+    margin-top: 5px;
+}
+
+.ticket-total-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+    font-size: 12px;
+}
+
+.ticket-total-row b {
+    font-size: 14px;
+}
+
+.ticket-footer {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+/* Botones debajo del papel en la pantalla */
+.ticket-action-buttons {
+    display: flex;
+    gap: 10px;
+    width: 320px;
+}
+
+.btn-close-ticket {
+    flex: 1;
+    background: #111827;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-print-ticket {
+    flex: 1;
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* =========================================================================
+   REGLAS CONFIGURADAS DE IMPRESIÓN (OCULTA BOTONES Y TRASFONDO)
+   ========================================================================= */
+@media print {
+
+    /* Ocultar absolutamente todo el sitio web de fondo */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Hacer visible únicamente la zona del papel del ticket */
+    #modal-factura-termica,
+    .invoice-card-container,
+    #area-ticket-impresion,
+    #area-ticket-impresion * {
+        visibility: visible;
+    }
+
+    /* Reubicar el ticket en la esquina superior izquierda de la hoja de impresión */
+    .invoice-card-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        background: #ffffff;
+    }
+
+    #area-ticket-impresion {
+        max-height: none;
+        /* Evita que el ticket se corte con barras de scroll al imprimir */
+        overflow: visible;
+    }
+
+    /* Ocultar los botones de forma estricta y forzada */
+    .no-print,
+    .ticket-action-buttons,
+    .btn-print-ticket,
+    .btn-close-ticket {
+        display: none !important;
+        visibility: hidden !important;
+    }
+}
+
+.qr-pago {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    display: block;
+}
